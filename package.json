@@ -1,22 +1,23 @@
 {
-  "name": "@charlescoeder/react-native-kuromoji",
+  "name": "@fotone/react-native-kuromoji",
   "description": "A React Native supported JavaScript implementation of Japanese morphological analyzer",
   "version": "0.2.1",
   "author": "Takuya Asano <takuya.a@gmail.com>",
   "contributors": [
-    "CharlesCoeder <croederdev@gmail.com>"
+    "CharlesCoeder <croederdev@gmail.com>",
+    "fotoner <jaemuon5582@gmail.com>"
   ],
   "browser": {
     "./src/loader/NodeDictionaryLoader.js": "./src/loader/BrowserDictionaryLoader.js"
   },
   "bugs": {
-    "url": "https://github.com/CharlesCoeder/react-native-kuromoji/issues"
+    "url": "https://github.com/fotoner/react-native-kuromoji/issues"
   },
   "dependencies": {
     "async": "^2.0.1",
     "doublearray": "0.0.2",
     "expo-file-system": "^15.6.0",
-    "pako": "^2.1.0"
+    "fflate": "^0.8.2"
   },
   "devDependencies": {
     "browserify": "^16.1.1",
@@ -43,7 +44,7 @@
     "run-sequence": "^2.2.1",
     "vinyl-source-stream": "^2.0.0"
   },
-  "homepage": "https://github.com/CharlesCoeder/react-native-kuromoji",
+  "homepage": "https://github.com/fotoner/react-native-kuromoji",
   "keywords": [
     "japanese",
     "morphological analyzer",
@@ -56,7 +57,7 @@
   "main": "./src/kuromoji.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CharlesCoeder/react-native-kuromoji.git"
+    "url": "git+https://github.com/fotoner/react-native-kuromoji.git"
   },
   "scripts": {
     "build": "gulp build",

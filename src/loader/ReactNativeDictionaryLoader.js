@@ -2,7 +2,7 @@
 
 const DictionaryLoader = require("./DictionaryLoader");
 import * as FileSystem from "expo-file-system";
-import pako from "pako";
+import fflate from "fflate";
 import { Buffer } from "buffer";
 
 function ReactNativeDictionaryLoader(options) {
@@ -40,19 +40,25 @@ ReactNativeDictionaryLoader.prototype.loadArrayBuffer = async function (
       encoding: FileSystem.EncodingType.Base64,
     });
     const readTime = (performance.now() - startRead).toFixed(1);
-    console.log(`  📂 [${filename}] FileSystem.readAsStringAsync: ${readTime}ms`);
+    console.log(
+      `  📂 [${filename}] FileSystem.readAsStringAsync: ${readTime}ms`
+    );
 
     // 2. Base64 디코딩
     const startDecode = performance.now();
     const buffer = Buffer.from(fileContents, "base64");
     const decodeTime = (performance.now() - startDecode).toFixed(1);
-    console.log(`  🔓 [${filename}] Base64 decode: ${decodeTime}ms (${buffer.length} bytes)`);
+    console.log(
+      `  🔓 [${filename}] Base64 decode: ${decodeTime}ms (${buffer.length} bytes)`
+    );
 
     // 3. 압축 해제
     const startInflate = performance.now();
-    const decompressed = pako.inflate(buffer);
+    const decompressed = fflate.inflateSync(buffer);
     const inflateTime = (performance.now() - startInflate).toFixed(1);
-    console.log(`  📦 [${filename}] pako.inflate: ${inflateTime}ms (${decompressed.length} bytes)`);
+    console.log(
+      `  📦 [${filename}] fflate.inflateSync: ${inflateTime}ms (${decompressed.length} bytes)`
+    );
 
     // 4. ArrayBuffer 변환
     const startConvert = performance.now();
