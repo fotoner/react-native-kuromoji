@@ -19,13 +19,34 @@
 
 var ByteBuffer = require("../util/ByteBuffer");
 
+function createMapProxy(map) {
+    return new Proxy(map, {
+        get(target, prop) {
+            if (prop in target) return target[prop];
+            return target.get(prop);
+        },
+        set(target, prop, value) {
+            target.set(prop, value);
+            return true;
+        },
+        has(target, prop) {
+            return target.has(prop);
+        },
+        deleteProperty(target, prop) {
+            return target.delete(prop);
+        }
+    });
+}
+
+
 /**
  * TokenInfoDictionary
  * @constructor
  */
 function TokenInfoDictionary() {
     this.dictionary = new ByteBuffer(10 * 1024 * 1024);
-    this.target_map = {};  // trie_id (of surface form) -> token_info_id (of token)
+    this.temp_map = new Map();
+    this.target_map = createMapProxy(this.temp_map); 
     this.pos_buffer = new ByteBuffer(10 * 1024 * 1024);
 }
 
@@ -118,7 +139,8 @@ TokenInfoDictionary.prototype.loadPosVector = function (array_buffer) {
 TokenInfoDictionary.prototype.loadTargetMap = function (array_buffer) {
     var buffer = new ByteBuffer(array_buffer);
     buffer.position = 0;
-    this.target_map = {};
+    this.temp_map = new Map();
+    this.target_map = createMapProxy(this.temp_map); 
     buffer.readInt();  // map_keys_size
     while (true) {
         if (buffer.buffer.length < buffer.position + 1) {
