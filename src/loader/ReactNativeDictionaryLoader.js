@@ -2,7 +2,9 @@
 
 const DictionaryLoader = require("./DictionaryLoader");
 import { File } from "expo-file-system/next";
-import { gunzipSync } from "fflate";
+
+// 파일 읽기 캐시 (병렬 읽기 최적화)
+const fileReadCache = new Map();
 
 function ReactNativeDictionaryLoader(options) {
   DictionaryLoader.call(this, null);
@@ -15,14 +17,45 @@ ReactNativeDictionaryLoader.prototype = Object.create(
 );
 ReactNativeDictionaryLoader.prototype.constructor = ReactNativeDictionaryLoader;
 
+ReactNativeDictionaryLoader.prototype.prefetchFiles = function () {
+  const filenames = [
+    "base.dat.gz",
+    "check.dat.gz",
+    "tid.dat.gz",
+    "tid_pos.dat.gz",
+    "tid_map.dat.gz",
+    "cc.dat.gz",
+    "unk.dat.gz",
+    "unk_pos.dat.gz",
+    "unk_map.dat.gz",
+    "unk_char.dat.gz",
+    "unk_compat.dat.gz",
+    "unk_invoke.dat.gz",
+  ];
+
+  let startedCount = 0;
+
+  filenames.forEach((filename) => {
+    const asset = this.assets[filename];
+    if (asset && asset.localUri) {
+      const uri = asset.localUri;
+
+      // 파일 읽기 시작 (압축 해제 불필요!)
+      if (!fileReadCache.has(uri)) {
+        const file = new File(uri);
+        const readPromise = file.bytes();
+        fileReadCache.set(uri, readPromise);
+        startedCount++;
+      }
+    }
+  });
+};
+
 ReactNativeDictionaryLoader.prototype.loadArrayBuffer = async function (
   filename,
   callback
 ) {
   try {
-    console.log(`🔍 [${filename}] 로딩 시작...`);
-    const startTotal = performance.now();
-
     const asset = this.assets[filename];
     if (!asset) {
       throw new Error(`Asset not found for filename: ${filename}`);
@@ -32,32 +65,19 @@ ReactNativeDictionaryLoader.prototype.loadArrayBuffer = async function (
     if (!uri) {
       throw new Error(`File not found: ${filename}`);
     }
+    let readPromise = fileReadCache.get(uri);
+    if (!readPromise) {
+      const file = new File(uri);
+      readPromise = file.bytes();
+      fileReadCache.set(uri, readPromise);
+    }
 
-    // 1. 파일 읽기 (바이너리 직접 읽기 - Base64 디코딩 불필요!)
-    const startRead = performance.now();
-    const file = new File(uri);
-    const buffer = await file.bytes();
-    const readTime = (performance.now() - startRead).toFixed(1);
+    const buffer = await readPromise;
     console.log(
       `  📂 [${filename}] File.bytes(): ${readTime}ms (${buffer.length} bytes)`
     );
 
-    // 2. 압축 해제 (동기 - React Native에는 Worker 없음)
-    const startInflate = performance.now();
-    const decompressed = gunzipSync(buffer);
-    const inflateTime = (performance.now() - startInflate).toFixed(1);
-    console.log(
-      `  📦 [${filename}] fflate.gunzipSync: ${inflateTime}ms (${decompressed.length} bytes)`
-    );
-
-    // 3. ArrayBuffer 변환
-    const startConvert = performance.now();
-    const arrayBuffer = decompressed.buffer;
-    const convertTime = (performance.now() - startConvert).toFixed(1);
-    console.log(`  🔄 [${filename}] .buffer 접근: ${convertTime}ms`);
-
-    const totalTime = (performance.now() - startTotal).toFixed(1);
-    console.log(`✅ [${filename}] 총 로딩 시간: ${totalTime}ms\n`);
+    const arrayBuffer = buffer.buffer;
 
     callback(null, arrayBuffer);
   } catch (error) {
