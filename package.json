@@ -1,7 +1,7 @@
 {
   "name": "@fotone/react-native-kuromoji",
   "description": "A React Native supported JavaScript implementation of Japanese morphological analyzer",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "author": "Takuya Asano <takuya.a@gmail.com>",
   "contributors": [
     "CharlesCoeder <croederdev@gmail.com>",

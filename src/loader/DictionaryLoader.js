@@ -41,6 +41,10 @@ DictionaryLoader.prototype.load = function (load_callback) {
   var dic = this.dic;
   var loadArrayBuffer = this.loadArrayBuffer;
 
+  if (this.prefetchFiles) {
+    this.prefetchFiles();
+  }
+
   async.parallel(
     [
       // Trie

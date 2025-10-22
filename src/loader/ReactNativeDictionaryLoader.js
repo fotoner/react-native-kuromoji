@@ -73,9 +73,6 @@ ReactNativeDictionaryLoader.prototype.loadArrayBuffer = async function (
     }
 
     const buffer = await readPromise;
-    console.log(
-      `  📂 [${filename}] File.bytes(): ${readTime}ms (${buffer.length} bytes)`
-    );
 
     const arrayBuffer = buffer.buffer;
 
